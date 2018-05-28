@@ -2,7 +2,7 @@
   "name": "iot-nad-controller",
   "version": "1.0.0",
   "description": "Application that connects to AWS IoT platform to listen to changes to modify local NAD Amplifier over RS-232",
-  "main": "iot-nad-controller.js",
+  "main": "index.js",
   "scripts": {
     "test": "jest"
   },
@@ -11,5 +11,13 @@
     "IoT"
   ],
   "author": "Daniel Malmkvist",
-  "license": "ISC"
+  "license": "ISC",
+  "jshintConfig": {
+    "esversion": 6
+  },
+  "dependencies": {
+    "aws-iot-device-sdk": "^2.2.1",
+    "minimist": "^1.2.0",
+    "nad-controller": "^1.0.0"
+  }
 }
