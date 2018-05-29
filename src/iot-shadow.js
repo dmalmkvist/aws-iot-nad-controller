@@ -47,7 +47,7 @@ module.exports = class IoTShadow extends EventEmitter {
     }
   }
 
-  updateReported(state, callback) {
+  updateReportedState(state, callback) {
     let stateObject = {
       state: {
         reported: state
@@ -59,16 +59,27 @@ module.exports = class IoTShadow extends EventEmitter {
     }
   }
 
+  updateDesiredState(state, callback) {
+    let stateObject = {
+      state: {
+        desired: state
+      }
+    };
+    let clientToken = this._thingShadow.update(this._cmdParser.thingName, stateObject);
+    if (callback) {
+      this._callbacks[clientToken] = callback;
+    }
+  }
+
   onRejected(error) {
-    console.log('ERROR: ' + error);
+    this.emit('rejected', error);
   }
 
   onError(error) {
-    console.log('ERROR: ' + error);
+    this.emit('error', error);
   }
 
   onDelta(thingName, stateObject) {
-    console.log('ondelta', JSON.stringify(stateObject));
     this.emit('delta', stateObject.state);
   }
 
@@ -76,7 +87,7 @@ module.exports = class IoTShadow extends EventEmitter {
 
     let callback = this._callbacks[clientToken];
     if (!callback) {
-      console.error('No callback found for token: ' + clientToken);
+      this.onError('No callback found for token: ' + clientToken);
       return;
     }
 
@@ -87,7 +98,7 @@ module.exports = class IoTShadow extends EventEmitter {
   onStatus(thingName, status, clientToken, stateObject) {
     let callback = this._callbacks[clientToken];
     if (!callback) {
-      console.error('No callback found for token: ' + clientToken + ', status:' + status);
+      this.onError('No callback found for token: ' + clientToken + ', status:' + status);
       return;
     }
     delete this._callbacks[clientToken];
@@ -100,6 +111,4 @@ module.exports = class IoTShadow extends EventEmitter {
       callback(null, stateObject);
     }
   }
-
-
 }
