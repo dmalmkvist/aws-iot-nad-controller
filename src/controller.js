@@ -1,75 +1,72 @@
-// const NadController = require('nad-controller');
+const EventEmitter = require('events');
+const NadController = require('nad-controller').NadController;
+const MODELS = require('nad-controller').MODELS;
 const DeviceState = require('./device-state');
-module.exports = class Controller {
 
+module.exports = class Controller extends EventEmitter {
 
   constructor(iotShadow) {
+    super();
     this._iotShadow = iotShadow;
-
-    this._deviceState = new DeviceState({});
-    //this._nadController = new NadController('/dev/ttyUSB0', '../config/nad-c355.json');
-
-    this.initialize(() => {
-      console.log('initialize complete', JSON.stringify(this._deviceState.getState()));
-      this.flipper();
-      // this._iotShadow.on('delta', this.onDelta.bind(this));
+    this._nadController = new NadController('/dev/ttyUSB0', {
+      model: MODELS.C355
     });
   }
 
-  flipper() {
-    setTimeout(function(that) {
-      that.flip();
-      that.flipper();
-    }, 5000, this);
-  }
+  connect(callback) {
 
-  flip() {
-    console.log('flip deviceState: ', this._deviceState.getState());
-    let muteChange = this._deviceState.getState()['Main.Mute'] === 'On'? 'Off' : 'On';
-    this.onDeviceChange({
-      "name":"Main.Mute",
-      "value": muteChange,
-      "physicalTrigger":true
+    this._nadController.open((error) => {
+      if (error) {
+        callback(error);
+        return;
+      }
+
+      this._nadController.getAllStates((error, statesArray) => {
+        if (error) {
+          this._nadController.close(() => callback(error));
+          return;
+        }
+
+        let states = {};
+        statesArray.map((state) => states[state.name] = state.value);
+
+        this._deviceState = new DeviceState(states);
+
+        this._deviceState.on('update', this.onStateChanged.bind(this));
+        this._iotShadow.on('delta', this.onDelta.bind(this));
+
+        this._iotShadow.updateReportedState(this._deviceState.getState(), (error, update) => {
+          if (error) {
+            this.emit(error);
+          }
+
+          this._nadController.close(() => callback(error));
+        });
+      });
     });
-  }
-
-  initialize(callback) {
-
-    // Get real device state
-    this._deviceState = new DeviceState({
-      "Main.Power": "Off",
-      "Main.Mute": "Off",
-      "Main.Source": "Video"
-    });
-
-    this._deviceState.on('update', this.onStateChanged.bind(this));
-    this._iotShadow.on('delta', this.onDelta.bind(this));
-
-    this._iotShadow.updateReportedState(this._deviceState.getState(), (error, update) => console.log('init state reported', JSON.stringify(update)));
-    callback();
   }
 
   onStateChanged(update) {
-    console.log('onLocalChange: ', update);
     if (Object.keys(update).length === 0) {
       return;
     }
 
-    this._iotShadow.updateReportedState(update, () => console.log('state reported', JSON.stringify(update)));
+    this._iotShadow.updateReportedState(update, (error, update) => {
+      if (error) {
+        this.emit(error);
+      }
+    });
   }
 
   onDelta(state) {
 
-    console.log('onDelta: ', state)
     Object.entries(state)
     .map((entry) => {
-      setTimeout(function(that) {
-        that.onDeviceChange({
-          "name": entry[0],
-          "value": entry[1],
-          "physicalTrigger": false
-        });
-      }, 1, this);
+      this._nadController.set(entry[0], entry[1], (error) => {
+        if (error) {
+          this.emit(error);
+        }
+      });
     });
   }
 
@@ -86,11 +83,13 @@ module.exports = class Controller {
     update[data.name] = data.value;
     if (data.physicalTrigger) {
 
-      console.log('onDeviceChange physicalTrigger:', update);
-      this._iotShadow.updateDesiredState(update, (error, state) => console.log('desired state updated:', JSON.stringify(state)));
+      this._iotShadow.updateDesiredState(update, (error, state) => {
+        if (error) {
+          this.emit(error);
+        }
+      });
     } else {
 
-      console.log('onDeviceChange NOT physicalTrigger:', update);
       this._deviceState.update(update);
     }
   }

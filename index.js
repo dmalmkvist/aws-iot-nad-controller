@@ -10,13 +10,13 @@ let iotShadow = new IotShadow(cmdParser);
 iotShadow.connect(function() {
   console.log('Connected to shadow');
   let controller = new Controller(iotShadow);
-  // controller.reportCurrentState((error, stateObject) => {
-  //   if (error) {
-  //     console.log('Failer to report state: ' + error);
-  //     process.exit(1);
-  //   }
+  controller.connect((error) => {
+    if (error) {
+      console.error(error);
+      process.exit(1);
+    }
 
-  //   console.log('Current state reported', stateObject);
-  // });
+    console.log('Controller up and running!')
+  });
 })
 
