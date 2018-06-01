@@ -1,5 +1,5 @@
 {
-  "name": "iot-nad-controller",
+  "name": "awt-iot-nad-controller",
   "version": "1.0.0",
   "description": "Application that connects to AWS IoT platform to listen to changes to modify local NAD Amplifier over RS-232",
   "main": "index.js",

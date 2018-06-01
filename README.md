@@ -16,7 +16,8 @@ To connection to a AWS IoT shadow the following is needed:
 - AWS IoT policy created that gives the certificate's owner the right to Connect, Publish, Subscribe and Receive.
 
 ```javascript
-nad-controller --private-key=private.pem.key
+#$ npm install -g awt-iot-nad-controller
+#$ nad-controller --private-key=private.pem.key
   --client-certificate=certificate.pem.crt
   --ca-certificate=root-CA.crt
   --client-id=<device-id>
