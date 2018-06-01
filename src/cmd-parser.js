@@ -38,10 +38,10 @@ module.exports = class CmdParser {
       unknown: unknownFunction.bind(this)
     });
 
-   if (args.help) {
+    if (this.parsedArgs.help) {
       this.printHelp();
       return;
-   }
+    }
 
     if (!this.parsedArgs.privateKey || !fs.existsSync(this.parsedArgs.privateKey)) {
       this.printHelp(' must specify a privateKey');
@@ -71,7 +71,9 @@ module.exports = class CmdParser {
 
   printHelp(error) {
 
-    console.error(error);
+    if (error) {
+      console.error(error);
+    }
 
     console.log('\n' +
       ' Options\n\n' +
@@ -81,6 +83,7 @@ module.exports = class CmdParser {
       '  -c, --client-certificate=FILE    use FILE as client certificate\n' +
       '  -a, --ca-certificate=FILE        use FILE as CA certificate\n' +
       '  -T, --thing-name=THINGNAME       access thing shadow named THINGNAME\n' +
+      '  -h, --help                       print help text\n' +
       '  -D, --debug                      print additional debugging information\n\n');
 
     process.exit(1);
