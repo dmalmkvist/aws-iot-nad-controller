@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const CmdParser = require('./src/cmd-parser');
 const IotShadow = require('./src/iot-shadow');
 const Controller = require('./src/controller');
