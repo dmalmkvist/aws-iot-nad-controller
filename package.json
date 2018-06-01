@@ -2,6 +2,11 @@
   "name": "awt-iot-nad-controller",
   "version": "1.0.0",
   "description": "Application that connects to AWS IoT platform to listen to changes to modify local NAD Amplifier over RS-232",
+  "homepage": "https://github.com/dmalmkvist/awt-iot-nad-controller",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dmalmkvist/awt-iot-nad-controller"
+  },
   "main": "index.js",
   "bin": {
     "nad-controller": "./index.js"
@@ -11,7 +16,8 @@
   },
   "keywords": [
     "NAD",
-    "IoT"
+    "IoT",
+    "AWS"
   ],
   "author": "Daniel Malmkvist",
   "license": "ISC",
