@@ -19,7 +19,9 @@ jest.mock('nad-controller', () => {
         open: mockOpen,
         close: mockClose,
         getAllStates: mockGetAllStates,
-        set: mockSet
+        set: mockSet,
+        on: jest.fn(),
+        emit: jest.fn()
       };
     })
   };

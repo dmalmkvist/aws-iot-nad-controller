@@ -11,6 +11,11 @@ let iotShadow = new IotShadow(cmdParser);
 iotShadow.connect(function() {
   console.log('Connected to shadow');
   let controller = new Controller(iotShadow);
+  controller.on('failure', (error) => console.log('ERROR: ' + error));
+  controller.on('delta', (data) => console.log('DELTA: ', data));
+  controller.on('state-change', (data) => console.log('STATE: ', data));
+  controller.on('device-change', (data) => console.log('DEVICE: ', data));
+
   controller.connect((error) => {
     if (error) {
       console.error(error);

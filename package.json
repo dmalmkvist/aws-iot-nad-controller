@@ -21,7 +21,7 @@
   "dependencies": {
     "aws-iot-device-sdk": "^2.2.1",
     "minimist": "^1.2.0",
-    "nad-controller": "^1.1.0"
+    "nad-controller": "^1.1.2"
   },
   "devDependencies": {
     "jest": "^23.0.1"

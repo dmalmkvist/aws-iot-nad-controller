@@ -11,6 +11,10 @@ module.exports = class Controller extends EventEmitter {
     this._nadController = new NadController('/dev/ttyUSB0', {
       model: MODELS.C355
     });
+
+    this._nadController.on('error', (error) => {
+      this.emit('error', error);
+    })
   }
 
   connect(callback) {
@@ -34,37 +38,40 @@ module.exports = class Controller extends EventEmitter {
 
         this._deviceState.on('update', this.onStateChanged.bind(this));
         this._iotShadow.on('delta', this.onDelta.bind(this));
+        this._nadController.on('update', this.onDeviceChange.bind(this));
 
         this._iotShadow.updateReportedState(this._deviceState.getState(), (error, update) => {
           if (error) {
-            this.emit(error);
+            this._nadController.close(() => callback(error));
+            return;
           }
 
-          this._nadController.close(() => callback(error));
+          callback();
         });
       });
     });
   }
 
   onStateChanged(update) {
+    this.emit('state-change', update);
     if (Object.keys(update).length === 0) {
       return;
     }
 
     this._iotShadow.updateReportedState(update, (error, update) => {
       if (error) {
-        this.emit(error);
+        this.emit('failure', error);
       }
     });
   }
 
   onDelta(state) {
-
+    this.emit('delta', state);
     Object.entries(state)
     .map((entry) => {
       this._nadController.set(entry[0], entry[1], (error) => {
         if (error) {
-          this.emit(error);
+          this.emit('failure', error);
         }
       });
     });
@@ -79,13 +86,14 @@ module.exports = class Controller extends EventEmitter {
    * }
    */
   onDeviceChange(data) {
+    this.emit('device-change', data);
     let update = {};
     update[data.name] = data.value;
     if (data.physicalTrigger) {
 
       this._iotShadow.updateDesiredState(update, (error, state) => {
         if (error) {
-          this.emit(error);
+          this.emit('failure', error);
         }
       });
     } else {
