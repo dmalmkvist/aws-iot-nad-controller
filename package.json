@@ -28,7 +28,8 @@
     "aws-iot-device-sdk": "^2.2.1",
     "minimist": "^1.2.0",
     "nad-controller": "^1.1.2",
-    "rconsole": "^0.3.0"
+    "rconsole": "^0.3.0",
+    "merge": ">=1.2.1"
   },
   "devDependencies": {
     "jest": "^23.0.1"
